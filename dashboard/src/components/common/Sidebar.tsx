@@ -32,23 +32,23 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
       {/* Sidebar Shell */}
       <aside
-        className={`fixed bottom-0 top-0 left-0 z-45 flex w-64 flex-col bg-[#09090b] border-r border-neutral-900 transition-transform duration-300 lg:translate-x-0 ${
+        className={`fixed bottom-0 top-0 left-0 z-45 flex w-64 flex-col bg-sidebar border-r border-border transition-transform duration-300 lg:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Header Logo */}
-        <div className="flex h-16 items-center justify-between px-6 border-b border-neutral-900">
+        <div className="flex h-16 items-center justify-between px-6 border-b border-border">
           <Link href="/" className="flex items-center gap-2" onClick={onClose}>
-            <span className="text-xl font-bold text-white tracking-wide font-sans">
+            <span className="text-xl font-bold text-foreground tracking-wide font-sans">
               &lt;<span className="text-[#E85D04]">MS</span> /&gt;
             </span>
-            <span className="text-xs uppercase text-neutral-400 bg-neutral-900 px-2 py-0.5 rounded-full font-mono border border-neutral-800">
+            <span className="text-xs uppercase text-muted-foreground bg-card px-2 py-0.5 rounded-full font-mono border border-border">
               Admin
             </span>
           </Link>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-neutral-400 hover:bg-neutral-900 hover:text-white lg:hidden"
+            className="rounded-lg p-1 text-muted-foreground hover:bg-card hover:text-foreground lg:hidden"
           >
             <X className="h-5 w-5" />
           </button>
@@ -67,12 +67,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
                   isActive
                     ? "bg-[#E85D04]/10 text-[#E85D04] border-l-2 border-[#E85D04] px-[14px]"
-                    : "text-neutral-400 hover:bg-[#121214] hover:text-white"
+                    : "text-muted-foreground hover:bg-card hover:text-foreground"
                 }`}
               >
                 <Icon
                   className={`h-5 w-5 transition-colors duration-200 ${
-                    isActive ? "text-[#E85D04]" : "text-neutral-400 group-hover:text-white"
+                    isActive ? "text-[#E85D04]" : "text-muted-foreground group-hover:text-foreground"
                   }`}
                 />
                 {item.name}
@@ -82,14 +82,14 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         </nav>
 
         {/* Footer info */}
-        <div className="border-t border-neutral-900 p-4">
-          <div className="flex items-center gap-3 rounded-xl bg-[#0d0d0e] p-3 border border-neutral-900">
+        <div className="border-t border-border p-4">
+          <div className="flex items-center gap-3 rounded-xl bg-card p-3 border border-border">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#E85D04]/10 border border-[#E85D04]/20 text-sm font-bold text-[#E85D04]">
               MS
             </div>
             <div className="overflow-hidden">
-              <p className="text-xs font-semibold text-white truncate">Sefat</p>
-              <p className="text-[10px] text-neutral-400 truncate">
+              <p className="text-xs font-semibold text-foreground truncate">Sefat</p>
+              <p className="text-[10px] text-muted-foreground truncate">
                 Frontend Developer
               </p>
             </div>

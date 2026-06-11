@@ -43,7 +43,7 @@ export function ContactContent() {
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <div className="flex gap-2 border-b border-neutral-900 pb-4">
+      <div className="flex gap-2 border-b border-border pb-4">
         {(["all", "unread", "read"] as const).map((type) => {
           const count =
             type === "all"
@@ -59,7 +59,7 @@ export function ContactContent() {
               className={`rounded-xl px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-all duration-200 border ${
                 filter === type
                   ? "bg-[#E85D04]/10 text-[#E85D04] border-[#E85D04]/30"
-                  : "bg-[#0d0d0e] text-neutral-400 border-neutral-900 hover:text-white hover:bg-neutral-900"
+                  : "bg-card text-muted-foreground border-border hover:text-foreground hover:bg-card"
               }`}
             >
               {type} ({count})
@@ -71,8 +71,8 @@ export function ContactContent() {
       {/* Messages List */}
       <div className="space-y-4">
         {filteredContacts.length === 0 ? (
-          <div className="py-16 text-center border border-dashed border-neutral-900 rounded-2xl bg-[#0d0d0e]">
-            <p className="text-neutral-500 text-sm">No messages found.</p>
+          <div className="py-16 text-center border border-dashed border-border rounded-2xl bg-card">
+            <p className="text-muted-foreground text-sm">No messages found.</p>
           </div>
         ) : (
           filteredContacts.map((msg) => {
@@ -84,10 +84,10 @@ export function ContactContent() {
                 onClick={() => handleSelectMessage(msg.id)}
                 className={`cursor-pointer transition-all duration-300 border ${
                   isExpanded
-                    ? "border-[#E85D04]/30 bg-[#0d0d0e]"
+                    ? "border-[#E85D04]/30 bg-card"
                     : msg.read
-                    ? "border-neutral-900/60 bg-[#070708]/40 opacity-70 hover:opacity-100"
-                    : "border-neutral-900 bg-[#0d0d0e]/80 hover:border-neutral-800"
+                    ? "border-border bg-card/40 opacity-70 hover:opacity-100"
+                    : "border-border bg-card hover:border-muted-foreground/30"
                 }`}
               >
                 <div className="flex flex-col gap-4">
@@ -97,7 +97,7 @@ export function ContactContent() {
                       {/* Read status Icon */}
                       <div className="mt-0.5 flex-shrink-0">
                         {msg.read ? (
-                          <MailOpen className="h-4 w-4 text-neutral-500" />
+                          <MailOpen className="h-4 w-4 text-muted-foreground" />
                         ) : (
                           <Mail className="h-4 w-4 text-[#E85D04] animate-pulse" />
                         )}
@@ -106,27 +106,27 @@ export function ContactContent() {
                       {/* Info */}
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                          <span className={`text-sm font-semibold truncate ${msg.read ? "text-neutral-400" : "text-white"}`}>
+                          <span className={`text-sm font-semibold truncate ${msg.read ? "text-muted-foreground" : "text-foreground"}`}>
                             {msg.name}
                           </span>
-                          <span className="text-xs text-neutral-500 font-mono">
+                          <span className="text-xs text-muted-foreground font-mono">
                             &lt;{msg.email}&gt;
                           </span>
                         </div>
-                        <h4 className={`text-xs font-medium mt-1 truncate ${msg.read ? "text-neutral-400" : "text-white"}`}>
+                        <h4 className={`text-xs font-medium mt-1 truncate ${msg.read ? "text-muted-foreground" : "text-foreground"}`}>
                           {msg.subject}
                         </h4>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-3 flex-shrink-0">
-                      <span className="flex items-center gap-1 text-[10px] text-neutral-500 font-medium">
+                      <span className="flex items-center gap-1 text-[10px] text-muted-foreground font-medium">
                         <Calendar className="h-3 w-3" />
                         {msg.date}
                       </span>
                       <button
                         onClick={(e) => handleDelete(msg.id, e)}
-                        className="p-2 rounded-lg text-neutral-500 hover:text-red-400 hover:bg-red-950/20 border border-transparent hover:border-red-900/20 transition-all duration-200"
+                        className="p-2 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-red-950/20 border border-transparent hover:border-border transition-all duration-200"
                         title="Delete message"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -136,13 +136,13 @@ export function ContactContent() {
 
                   {/* Expandable message details */}
                   {isExpanded && (
-                    <div className="border-t border-neutral-900/80 pt-4 mt-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <div className="rounded-xl bg-neutral-950 p-4 border border-neutral-900/60 space-y-3">
-                        <div className="flex items-center gap-1.5 text-xs text-neutral-400 border-b border-neutral-900/40 pb-2">
+                    <div className="border-t border-border pt-4 mt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="rounded-xl bg-background p-4 border border-border space-y-3">
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground border-b border-border pb-2">
                           <User className="h-3.5 w-3.5 text-[#E85D04]" />
                           <span>Sender details: <strong>{msg.name}</strong> ({msg.email})</span>
                         </div>
-                        <p className="text-xs text-neutral-300 whitespace-pre-wrap leading-relaxed font-sans">
+                        <p className="text-xs text-foreground whitespace-pre-wrap leading-relaxed font-sans">
                           {msg.message}
                         </p>
                       </div>

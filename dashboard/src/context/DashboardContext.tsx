@@ -186,6 +186,8 @@ interface DashboardContextType {
   deleteBlog: (id: number) => void;
   deleteContact: (id: number) => void;
   markContactAsRead: (id: number) => void;
+  theme: "dark" | "light";
+  toggleTheme: () => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -194,6 +196,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   const [projects, setProjects] = useState<Project[]>(INITIAL_PROJECTS);
   const [blogs, setBlogs] = useState<Blog[]>(INITIAL_BLOGS);
   const [contacts, setContacts] = useState<Contact[]>(INITIAL_CONTACTS);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [hydrated, setHydrated] = useState(false);
 
   // Load state from localStorage on mount
@@ -202,10 +205,22 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       const storedProjects = localStorage.getItem("dashboard_projects");
       const storedBlogs = localStorage.getItem("dashboard_blogs");
       const storedContacts = localStorage.getItem("dashboard_contacts");
+      const storedTheme = localStorage.getItem("dashboard_theme") as "dark" | "light" | null;
 
       if (storedProjects) setProjects(JSON.parse(storedProjects));
       if (storedBlogs) setBlogs(JSON.parse(storedBlogs));
       if (storedContacts) setContacts(JSON.parse(storedContacts));
+      
+      if (storedTheme) {
+        setTheme(storedTheme);
+        if (storedTheme === "light") {
+          document.documentElement.classList.add("light");
+        } else {
+          document.documentElement.classList.remove("light");
+        }
+      } else {
+        document.documentElement.classList.remove("light");
+      }
 
       setHydrated(true);
     }
@@ -229,6 +244,19 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem("dashboard_contacts", JSON.stringify(contacts));
     }
   }, [contacts, hydrated]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => {
+      const nextTheme = prev === "dark" ? "light" : "dark";
+      localStorage.setItem("dashboard_theme", nextTheme);
+      if (nextTheme === "light") {
+        document.documentElement.classList.add("light");
+      } else {
+        document.documentElement.classList.remove("light");
+      }
+      return nextTheme;
+    });
+  };
 
   // Project CRUD
   const addProject = (projectData: Omit<Project, "id">) => {
@@ -303,6 +331,8 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         deleteBlog,
         deleteContact,
         markContactAsRead,
+        theme,
+        toggleTheme,
       }}
     >
       {children}

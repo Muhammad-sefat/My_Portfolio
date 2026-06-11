@@ -39,20 +39,20 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       />
 
       {/* Modal Dialog */}
-      <div className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-[#0c0c0d] border border-neutral-900 shadow-xl transition-all duration-300 z-10 max-h-[90vh] flex flex-col">
+      <div className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-card border border-border shadow-xl transition-all duration-300 z-10 max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-neutral-900 p-5">
-          <h2 className="text-lg font-semibold text-white">{title}</h2>
+        <div className="flex items-center justify-between border-b border-border p-5">
+          <h2 className="text-lg font-semibold text-foreground">{title}</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-neutral-400 hover:bg-neutral-900 hover:text-white transition-colors"
+            className="rounded-lg p-1 text-muted-foreground hover:bg-background hover:text-foreground transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto p-6 flex-1 text-neutral-300">
+        <div className="overflow-y-auto p-6 flex-1 text-foreground/90">
           {children}
         </div>
       </div>

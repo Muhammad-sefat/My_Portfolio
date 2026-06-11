@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDashboard } from "@/context/DashboardContext";
 import { useToast } from "@/components/ui/Toast";
 import { Button } from "@/components/ui/Button";
@@ -17,6 +17,10 @@ export function ProjectContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
 
+  // Pagination States
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
+
   // Form Fields
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -24,6 +28,11 @@ export function ProjectContent() {
   const [liveUrl, setLiveUrl] = useState("");
   const [githubUrl, setGithubUrl] = useState("");
   const [tagsInput, setTagsInput] = useState("");
+
+  // Reset pagination on search query change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
 
   const openAddModal = () => {
     setEditingProject(null);
@@ -112,19 +121,25 @@ export function ProjectContent() {
     );
   });
 
+  // Pagination Calculations
+  const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
+  const activePage = Math.max(1, Math.min(currentPage, totalPages || 1));
+  const startIndex = (activePage - 1) * itemsPerPage;
+  const paginatedProjects = filteredProjects.slice(startIndex, startIndex + itemsPerPage);
+
   return (
     <div className="space-y-6">
       {/* Action Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         {/* Search */}
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search projects by title or tag..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-[#0d0d0e] border border-neutral-900 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-[#E85D04] transition-colors placeholder:text-neutral-500"
+            className="w-full bg-input-bg border border-border rounded-xl py-2.5 pl-10 pr-4 text-sm text-foreground focus:outline-none focus:border-[#E85D04] transition-colors placeholder:text-muted-foreground/50"
           />
         </div>
 
@@ -137,15 +152,15 @@ export function ProjectContent() {
 
       {/* Grid List */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredProjects.length === 0 ? (
-          <div className="col-span-full py-16 text-center border border-dashed border-neutral-900 rounded-2xl bg-[#0d0d0e]">
-            <p className="text-neutral-500 text-sm">No projects match your search.</p>
+        {paginatedProjects.length === 0 ? (
+          <div className="col-span-full py-16 text-center border border-dashed border-border rounded-2xl bg-card">
+            <p className="text-muted-foreground text-sm">No projects match your search.</p>
           </div>
         ) : (
-          filteredProjects.map((project) => (
-            <Card key={project.id} className="flex flex-col h-full overflow-hidden !p-0 border border-neutral-900/60" hoverEffect>
+          paginatedProjects.map((project) => (
+            <Card key={project.id} className="flex flex-col h-full overflow-hidden !p-0 border border-border" hoverEffect>
               {/* Image Preview */}
-              <div className="relative aspect-video w-full overflow-hidden bg-neutral-950 border-b border-neutral-900">
+              <div className="relative aspect-video w-full overflow-hidden bg-background border-b border-border">
                 <img
                   src={project.image || "https://picsum.photos/seed/default/800/600"}
                   alt={project.title}
@@ -154,14 +169,14 @@ export function ProjectContent() {
                 <div className="absolute top-3 right-3 flex gap-2">
                   <button
                     onClick={() => openEditModal(project)}
-                    className="p-2 rounded-xl bg-black/80 text-neutral-300 hover:text-white hover:bg-neutral-900 border border-neutral-800 backdrop-blur-md transition-colors"
+                    className="p-2 rounded-xl bg-background/80 text-muted-foreground hover:text-foreground hover:bg-card border border-border backdrop-blur-md transition-colors"
                     title="Edit project"
                   >
                     <Edit3 className="h-3.5 w-3.5" />
                   </button>
                   <button
                     onClick={() => handleDelete(project.id, project.title)}
-                    className="p-2 rounded-xl bg-black/80 text-red-400 hover:text-red-300 hover:bg-red-950/40 border border-red-900/20 backdrop-blur-md transition-colors"
+                    className="p-2 rounded-xl bg-background/80 text-red-400 hover:text-red-300 hover:bg-red-950/40 border border-red-900/20 backdrop-blur-md transition-colors"
                     title="Delete project"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -172,8 +187,8 @@ export function ProjectContent() {
               {/* Card Contents */}
               <div className="p-5 flex-1 flex flex-col justify-between">
                 <div>
-                  <h3 className="font-bold text-white text-base truncate">{project.title}</h3>
-                  <p className="text-xs text-neutral-400 mt-2 line-clamp-2 leading-relaxed">
+                  <h3 className="font-bold text-foreground text-base truncate">{project.title}</h3>
+                  <p className="text-xs text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
                     {project.description}
                   </p>
                 </div>
@@ -184,7 +199,7 @@ export function ProjectContent() {
                     {project.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="text-[10px] bg-neutral-900 text-neutral-400 border border-neutral-800/80 px-2 py-0.5 rounded-md"
+                        className="text-[10px] bg-background text-muted-foreground border border-border px-2 py-0.5 rounded-md"
                       >
                         {tag}
                       </span>
@@ -192,13 +207,13 @@ export function ProjectContent() {
                   </div>
 
                   {/* Links */}
-                  <div className="flex gap-3 border-t border-neutral-900 pt-4">
+                  <div className="flex gap-3 border-t border-border pt-4">
                     {project.liveUrl && (
                       <a
                         href={project.liveUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border border-neutral-800 bg-[#0d0d0e] hover:bg-[#121214] py-1.5 text-xs text-neutral-300 hover:text-white transition-colors"
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border border-border bg-card hover:bg-background py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
                       >
                         <ExternalLink className="h-3 w-3" />
                         Live Demo
@@ -209,7 +224,7 @@ export function ProjectContent() {
                         href={project.githubUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border border-neutral-800 bg-[#0d0d0e] hover:bg-[#121214] py-1.5 text-xs text-neutral-300 hover:text-white transition-colors"
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border border-border bg-card hover:bg-background py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
                       >
                         <Github className="h-3 w-3" />
                         GitHub
@@ -223,6 +238,40 @@ export function ProjectContent() {
         )}
       </div>
 
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-t border-border pt-6 mt-6">
+          <p className="text-xs text-muted-foreground text-center sm:text-left">
+            Showing <span className="font-semibold text-foreground">{startIndex + 1}</span> to{" "}
+            <span className="font-semibold text-foreground">
+              {Math.min(startIndex + itemsPerPage, filteredProjects.length)}
+            </span>{" "}
+            of <span className="font-semibold text-foreground">{filteredProjects.length}</span> projects
+          </p>
+          <div className="flex items-center justify-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={activePage === 1}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            >
+              Previous
+            </Button>
+            <div className="flex items-center justify-center px-3 text-xs font-semibold text-foreground">
+              Page {activePage} of {totalPages}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={activePage === totalPages}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Upload/Edit Modal */}
       <Modal
         isOpen={isModalOpen}
@@ -231,7 +280,7 @@ export function ProjectContent() {
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
               Project Title *
             </label>
             <input
@@ -240,12 +289,12 @@ export function ProjectContent() {
               placeholder="e.g. Portfolio Website"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-neutral-950 border border-neutral-900 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#E85D04] transition-colors"
+              className="w-full bg-input-bg border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-[#E85D04] transition-colors"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
               Description *
             </label>
             <textarea
@@ -254,12 +303,12 @@ export function ProjectContent() {
               placeholder="Describe what the project does, key features..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full bg-neutral-950 border border-neutral-900 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#E85D04] transition-colors resize-none"
+              className="w-full bg-input-bg border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-[#E85D04] transition-colors resize-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
               Cover Image URL
             </label>
             <input
@@ -267,13 +316,13 @@ export function ProjectContent() {
               placeholder="https://picsum.photos/..."
               value={image}
               onChange={(e) => setImage(e.target.value)}
-              className="w-full bg-neutral-950 border border-neutral-900 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#E85D04] transition-colors"
+              className="w-full bg-input-bg border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-[#E85D04] transition-colors"
             />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
                 Live URL
               </label>
               <input
@@ -281,11 +330,11 @@ export function ProjectContent() {
                 placeholder="https://example.com"
                 value={liveUrl}
                 onChange={(e) => setLiveUrl(e.target.value)}
-                className="w-full bg-neutral-950 border border-neutral-900 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#E85D04] transition-colors"
+                className="w-full bg-input-bg border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-[#E85D04] transition-colors"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
                 GitHub Repository URL
               </label>
               <input
@@ -293,13 +342,13 @@ export function ProjectContent() {
                 placeholder="https://github.com/..."
                 value={githubUrl}
                 onChange={(e) => setGithubUrl(e.target.value)}
-                className="w-full bg-neutral-950 border border-neutral-900 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#E85D04] transition-colors"
+                className="w-full bg-input-bg border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-[#E85D04] transition-colors"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
               Tags (Comma separated)
             </label>
             <input
@@ -307,11 +356,11 @@ export function ProjectContent() {
               placeholder="e.g. Next.js, React, Tailwind, Prisma"
               value={tagsInput}
               onChange={(e) => setTagsInput(e.target.value)}
-              className="w-full bg-neutral-950 border border-neutral-900 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#E85D04] transition-colors"
+              className="w-full bg-input-bg border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-[#E85D04] transition-colors"
             />
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-neutral-900 mt-6">
+          <div className="flex justify-end gap-3 pt-4 border-t border-border mt-6">
             <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>

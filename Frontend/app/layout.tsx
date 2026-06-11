@@ -20,7 +20,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "MS — Frontend Developer & Aspiring Software Engineer",
+  title: "MS_Portfolio",
   description:
     "Portfolio of MS, a frontend developer building modern web experiences with React & Next.js, expanding into full-stack with the MERN stack.",
   metadataBase: new URL("https://myportfolio.com"),

@@ -1,13 +1,18 @@
 import cors from "cors";
 import express, { Application, Request, Response, NextFunction } from "express";
+import swaggerUi from "swagger-ui-express";
 import globalErrorHandler from "./app/errors/globalErrorHandler";
 import router from "./app/routes";
+import swaggerSpec from "./app/swagger/swagger";
 
 const app: Application = express();
 
 // Parsers
 app.use(express.json());
 app.use(cors({ origin: "*" }));
+
+// Swagger API Docs
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Application Routes
 app.use("/api", router);

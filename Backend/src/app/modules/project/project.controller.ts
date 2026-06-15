@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import catchAsync from "../../../utils/catchAsync";
-import sendResponse from "../../../utils/sendResponse";
-import { ProjectServices } from "./project.service";
+import catchAsync from "../../../utils/catchAsync.js";
+import sendResponse from "../../../utils/sendResponse.js";
+import { ProjectServices } from "./project.service.js";
 
 const addProject = catchAsync(async (req: Request, res: Response) => {
   const result = await ProjectServices.addProjectIntoDB(req.body);

@@ -1,9 +1,9 @@
 import cors from "cors";
-import express, { Application, Request, Response, NextFunction } from "express";
+import express, { Application, Request, Response } from "express";
 import swaggerUi from "swagger-ui-express";
-import globalErrorHandler from "./app/errors/globalErrorHandler";
-import router from "./app/routes";
-import swaggerSpec from "./app/swagger/swagger";
+import globalErrorHandler from "./app/errors/globalErrorHandler.js";
+import router from "./app/routes/index.js";
+import swaggerSpec from "./app/swagger/swagger.js";
 
 const app: Application = express();
 

@@ -1,5 +1,5 @@
-import { IBlog } from "./blog.interface";
-import { Blog } from "./blog.model";
+import { IBlog } from "./blog.interface.js";
+import { Blog } from "./blog.model.js";
 
 const addBlogIntoDB = async (payload: IBlog) => {
   if (!payload.date) {

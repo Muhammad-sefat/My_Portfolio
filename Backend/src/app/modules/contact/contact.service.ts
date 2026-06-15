@@ -1,5 +1,5 @@
-import { IContact } from "./contact.interface";
-import { Contact } from "./contact.model";
+import { IContact } from "./contact.interface.js";
+import { Contact } from "./contact.model.js";
 
 const addContactIntoDB = async (payload: Partial<IContact>) => {
   const today = new Date();

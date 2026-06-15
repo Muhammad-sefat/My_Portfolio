@@ -1,5 +1,5 @@
-import { IProject } from "./project.interface";
-import { Project } from "./project.model";
+import { IProject } from "./project.interface.js";
+import { Project } from "./project.model.js";
 
 const addProjectIntoDB = async (payload: IProject) => {
   const result = await Project.create(payload);

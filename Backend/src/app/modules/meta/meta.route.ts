@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { MetaControllers } from "./meta.controller";
+import { MetaControllers } from "./meta.controller.js";
 
 const router = Router();
 

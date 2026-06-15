@@ -1,7 +1,7 @@
 import { Router } from "express";
-import validateRequest from "../../middlewares/validateRequest";
-import { ContactControllers } from "./contact.controller";
-import { ContactValidations } from "./contact.validation";
+import validateRequest from "../../middlewares/validateRequest.js";
+import { ContactControllers } from "./contact.controller.js";
+import { ContactValidations } from "./contact.validation.js";
 
 const router = Router();
 

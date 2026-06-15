@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import catchAsync from "../../../utils/catchAsync";
-import sendResponse from "../../../utils/sendResponse";
-import { ContactServices } from "./contact.service";
+import catchAsync from "../../../utils/catchAsync.js";
+import sendResponse from "../../../utils/sendResponse.js";
+import { ContactServices } from "./contact.service.js";
 
 const addContact = catchAsync(async (req: Request, res: Response) => {
   const result = await ContactServices.addContactIntoDB(req.body);

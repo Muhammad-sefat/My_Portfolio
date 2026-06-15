@@ -1,16 +1,15 @@
-import mongoose from "mongoose";
-import app from "./app";
-import config from "./config";
+import app from "./app.js";
+import { env } from "./config/env.js";
+import { connectDB } from "./config/db.js";
 import { Server } from "http";
-import { seedInitialProjects } from "./app/modules/project/project.model";
-import { seedInitialBlogs } from "./app/modules/blog/blog.model";
+import { seedInitialProjects } from "./app/modules/project/project.model.js";
+import { seedInitialBlogs } from "./app/modules/blog/blog.model.js";
 
 let server: Server;
 
 async function main() {
   try {
-    await mongoose.connect(config.database_url as string);
-    console.log("Database connected successfully!");
+    await connectDB();
 
     const initialProjects = [
       {
@@ -68,8 +67,8 @@ async function main() {
     await seedInitialProjects(initialProjects);
     await seedInitialBlogs(initialBlogs);
 
-    server = app.listen(config.port, () => {
-      console.log(`http://localhost:${config.port}`);
+    server = app.listen(env.port, () => {
+      console.log(`http://localhost:${env.port}`);
     });
   } catch (error) {
     console.error("Failed to bootstrap application:", error);

@@ -69,7 +69,7 @@ async function main() {
     await seedInitialBlogs(initialBlogs);
 
     server = app.listen(config.port, () => {
-      console.log(`Application is running on port ${config.port}`);
+      console.log(`http://localhost:${config.port}`);
     });
   } catch (error) {
     console.error("Failed to bootstrap application:", error);

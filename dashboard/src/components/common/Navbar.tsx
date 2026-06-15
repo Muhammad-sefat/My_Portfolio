@@ -3,7 +3,7 @@
 import React from "react";
 import { usePathname } from "next/navigation";
 import { Menu, Bell, Sun, Moon } from "lucide-react";
-import { useDashboard } from "@/context/DashboardContext";
+import { useDashboard } from "@/providers/DashboardProvider";
 
 interface NavbarProps {
   onMenuClick: () => void;

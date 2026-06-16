@@ -1,6 +1,6 @@
-import { Project } from "../project/project.model";
-import { Blog } from "../blog/blog.model";
-import { Contact } from "../contact/contact.model";
+import { Project } from "../project/project.model.js";
+import { Blog } from "../blog/blog.model.js";
+import { Contact } from "../contact/contact.model.js";
 
 const getStatsFromDB = async () => {
   const totalProjects = await Project.countDocuments();

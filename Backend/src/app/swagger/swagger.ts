@@ -14,6 +14,10 @@ const options: swaggerJsdoc.Options = {
         url: "http://localhost:5000",
         description: "Development server",
       },
+      {
+        url: "https://my-portfolio-backend-alpha-blond.vercel.app",
+        description: "Production server",
+      },
     ],
   },
   apis: ["./src/app/modules/**/*.route.ts"],

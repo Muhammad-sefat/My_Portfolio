@@ -1,4 +1,4 @@
-import { OverviewContent } from "@/components/dashboard/OverviewContent";
+import { OverviewContent } from "@/features/overview/components/OverviewContent";
 
 export default function Page() {
   return <OverviewContent />;

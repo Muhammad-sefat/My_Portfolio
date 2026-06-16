@@ -1,7 +1,7 @@
 import { Router } from "express";
-import validateRequest from "../../middlewares/validateRequest";
-import { ProjectControllers } from "./project.controller";
-import { ProjectValidations } from "./project.validation";
+import validateRequest from "../../middlewares/validateRequest.js";
+import { ProjectControllers } from "./project.controller.js";
+import { ProjectValidations } from "./project.validation.js";
 
 const router = Router();
 

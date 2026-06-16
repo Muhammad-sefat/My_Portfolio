@@ -1,4 +1,4 @@
-import { ProjectContent } from "@/components/dashboard/ProjectContent";
+import { ProjectContent } from "@/features/projects/components/ProjectContent";
 
 export default function ProjectsPage() {
   return <ProjectContent />;

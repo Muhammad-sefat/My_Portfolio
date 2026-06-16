@@ -15,7 +15,7 @@ const options: swaggerJsdoc.Options = {
         description: "Development server",
       },
       {
-        url: "https://my-portfolio-backend-alpha-blond.vercel.app",
+        url: "https://my-portfolio-zsvg.vercel.app",
         description: "Production server",
       },
     ],

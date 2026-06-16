@@ -4,6 +4,7 @@ import swaggerUi from "swagger-ui-express";
 import globalErrorHandler from "./app/errors/globalErrorHandler.js";
 import router from "./app/routes/index.js";
 import swaggerSpec from "./app/swagger/swagger.js";
+import { connectDB } from "./config/db.js";
 
 const app: Application = express();
 
@@ -15,7 +16,14 @@ app.use(cors({ origin: "*" }));
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Application Routes
-app.use("/api", router);
+app.use("/api", async (req: Request, res: Response, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    next(error);
+  }
+}, router);
 
 // Root Route
 app.get("/", (req: Request, res: Response) => {

@@ -1,11 +1,11 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useDashboard } from "@/providers/DashboardProvider";
 import { useToast } from "@/components/ui/Toast";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { Modal } from "@/components/ui/Modal";
 import {
   Plus,
   Search,
@@ -15,107 +15,120 @@ import {
   Clock,
 } from "lucide-react";
 import { Blog } from "../types";
+import { blogService } from "../services/blog.service";
+import { BlogEditorModal } from "@/components/common/modal/BlogEditorModal";
+import { BlogDeleteModal } from "@/components/common/modal/BlogDeleteModal";
 
 export function BlogContent() {
-  const { blogs, addBlog, editBlog, deleteBlog } = useDashboard();
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const { toast } = useToast();
 
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
 
+  // Delete Modal States
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [blogToDelete, setBlogToDelete] = useState<{ id: string | number; title: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   // Pagination States
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
-  // Form Fields
-  const [title, setTitle] = useState("");
-  const [excerpt, setExcerpt] = useState("");
-  const [content, setContent] = useState("");
-  const [category, setCategory] = useState("");
-  const [image, setImage] = useState("");
-  const [readTime, setReadTime] = useState("");
+  const loadBlogs = async (showLoading = false) => {
+    if (showLoading) setLoading(true);
+    try {
+      const data = await blogService.getBlogs();
+      setBlogs(data);
+    } catch (error) {
+      console.log(error);
+      setError("Failed to load blogs");
+    } finally {
+      if (showLoading) setLoading(false);
+    }
+  };
 
-  // Reset pagination on search query change
   useEffect(() => {
-    setCurrentPage(1);
-  }, [search]);
+    loadBlogs(true);
+  }, []);
 
   const openAddModal = () => {
     setEditingBlog(null);
-    setTitle("");
-    setExcerpt("");
-    setContent("");
-    setCategory("Development");
-    setImage("https://picsum.photos/seed/newblog/800/400");
-    setReadTime("5 min read");
     setIsModalOpen(true);
   };
 
   const openEditModal = (blog: Blog) => {
     setEditingBlog(blog);
-    setTitle(blog.title);
-    setExcerpt(blog.excerpt);
-    setContent(blog.content);
-    setCategory(blog.category);
-    setImage(blog.image);
-    setReadTime(blog.readTime);
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: number, blogTitle: string) => {
-    if (confirm(`Are you sure you want to delete article "${blogTitle}"?`)) {
-      deleteBlog(id);
+  const handleDelete = (id: string | number, blogTitle: string) => {
+    setBlogToDelete({ id, title: blogTitle });
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!blogToDelete) return;
+    setDeleting(true);
+    try {
+      await blogService.deleteBlog(String(blogToDelete.id));
       toast({
         title: "Blog Post Deleted",
-        description: `"${blogTitle}" has been deleted.`,
+        description: `"${blogToDelete.title}" has been deleted.`,
         variant: "destructive",
       });
+      setIsDeleteModalOpen(false);
+      await loadBlogs(); // Refetch database data to update instantly
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: "Error",
+        description: "Failed to delete blog article.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(false);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!title.trim() || !excerpt.trim() || !content.trim()) {
+  const handleEditorSubmit = async (blogData: {
+    title: string;
+    excerpt: string;
+    content: string;
+    category: string;
+    image: string;
+    readTime: string;
+  }) => {
+    try {
+      if (editingBlog) {
+        const id = editingBlog._id || String(editingBlog.id || "");
+        await blogService.updateBlog(id, blogData);
+        toast({
+          title: "Blog Article Updated",
+          description: `"${blogData.title}" has been successfully updated.`,
+          variant: "success",
+        });
+      } else {
+        await blogService.createBlog(blogData);
+        toast({
+          title: "Blog Article Published",
+          description: `"${blogData.title}" has been published.`,
+          variant: "success",
+        });
+      }
+      setIsModalOpen(false);
+      await loadBlogs(); // Refetch database data to update instantly
+    } catch (err) {
+      console.error(err);
       toast({
-        title: "Validation Error",
-        description: "Please fill in Title, Excerpt, and Content.",
+        title: "Error",
+        description: editingBlog ? "Failed to update blog article." : "Failed to publish blog article.",
         variant: "destructive",
       });
-      return;
     }
-
-    const blogData = {
-      title,
-      excerpt,
-      content,
-      category: category.trim() || "General",
-      image: image.trim() || "https://picsum.photos/seed/default/800/400",
-      readTime: readTime.trim() || "3 min read",
-    };
-
-    if (editingBlog) {
-      editBlog({
-        ...blogData,
-        id: editingBlog.id,
-        date: editingBlog.date,
-      });
-      toast({
-        title: "Blog Article Updated",
-        description: `"${title}" has been successfully updated.`,
-        variant: "success",
-      });
-    } else {
-      addBlog(blogData);
-      toast({
-        title: "Blog Article Published",
-        description: `"${title}" has been published.`,
-        variant: "success",
-      });
-    }
-
-    setIsModalOpen(false);
   };
 
   // Filter blogs by Search Query
@@ -137,6 +150,17 @@ export function BlogContent() {
     startIndex + itemsPerPage,
   );
 
+  if (loading) {
+    return (
+      <div className="flex justify-center py-10">
+        Loading blogs...
+      </div>
+    );
+  }
+  if (error) {
+    return <div className="flex justify-center py-10">{error}</div>;
+  }
+
   return (
     <div className="space-y-6">
       {/* Action Header */}
@@ -154,7 +178,7 @@ export function BlogContent() {
         </div>
 
         {/* Add Blog Button */}
-        <Button onClick={openAddModal} className="flex gap-2 items-center">
+        <Button onClick={openAddModal} className="flex gap-2 items-center cursor-pointer">
           <Plus className="h-4 w-4" />
           Write New Blog
         </Button>
@@ -171,7 +195,7 @@ export function BlogContent() {
         ) : (
           paginatedBlogs.map((blog) => (
             <Card
-              key={blog.id}
+              key={blog._id || blog.id}
               className="flex flex-col h-full overflow-hidden p-0! border border-border"
               hoverEffect
             >
@@ -202,7 +226,7 @@ export function BlogContent() {
                     <Edit3 className="h-3.5 w-3.5" />
                   </button>
                   <button
-                    onClick={() => handleDelete(blog.id, blog.title)}
+                    onClick={() => handleDelete(blog._id || blog.id || "", blog.title)}
                     className="p-2 rounded-xl bg-background/80 text-red-400 hover:text-red-300 hover:bg-red-950/40 border border-red-900/20 backdrop-blur-md transition-colors"
                     title="Delete blog"
                   >
@@ -234,8 +258,8 @@ export function BlogContent() {
 
                 {/* Actions Bar */}
                 <div className="flex items-center justify-between border-t border-border pt-4 mt-4">
-                  <span className="text-[10px] text-muted-foreground font-mono">
-                    ID: {blog.id}
+                  <span className="text-[10px] text-muted-foreground font-mono text-ellipsis overflow-hidden max-w-[120px] whitespace-nowrap">
+                    ID: {blog._id || blog.id}
                   </span>
                   <div className="flex gap-2">
                     <Button
@@ -250,7 +274,7 @@ export function BlogContent() {
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => handleDelete(blog.id, blog.title)}
+                      onClick={() => handleDelete(blog._id || blog.id || "", blog.title)}
                       className="flex gap-1 items-center px-2.5! py-1! text-xs"
                     >
                       <Trash2 className="h-3 w-3" />
@@ -307,108 +331,21 @@ export function BlogContent() {
       )}
 
       {/* Editor Modal */}
-      <Modal
+      <BlogEditorModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingBlog ? "Edit Blog Article" : "Compose New Blog Article"}
-      >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-              Article Title *
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Getting Started with React 19"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-input-bg border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-[#E85D04] transition-colors"
-            />
-          </div>
+        onSubmit={handleEditorSubmit}
+        editingBlog={editingBlog}
+      />
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                Category
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. Next.js, Backend, CSS"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-input-bg border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-[#E85D04] transition-colors"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                Read Time
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. 5 min read"
-                value={readTime}
-                onChange={(e) => setReadTime(e.target.value)}
-                className="w-full bg-input-bg border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-[#E85D04] transition-colors"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-              Cover Image URL
-            </label>
-            <input
-              type="url"
-              placeholder="https://picsum.photos/..."
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-              className="w-full bg-input-bg border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-[#E85D04] transition-colors"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-              Excerpt / Short Summary *
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="Provide a quick 1-2 sentence hook..."
-              value={excerpt}
-              onChange={(e) => setExcerpt(e.target.value)}
-              className="w-full bg-input-bg border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-[#E85D04] transition-colors"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-              Article Body Content *
-            </label>
-            <textarea
-              required
-              rows={8}
-              placeholder="Write the full post here..."
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className="w-full bg-input-bg border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-[#E85D04] transition-colors resize-none font-mono"
-            />
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4 border-t border-border mt-6">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsModalOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit">
-              {editingBlog ? "Save Changes" : "Publish Post"}
-            </Button>
-          </div>
-        </form>
-      </Modal>
+      {/* Delete Confirmation Modal */}
+      <BlogDeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
+        blogTitle={blogToDelete?.title}
+        deleting={deleting}
+      />
     </div>
   );
 }

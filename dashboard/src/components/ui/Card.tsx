@@ -12,11 +12,10 @@ export function Card({
 }: CardProps) {
   return (
     <div
-      className={`bg-card border border-border rounded-2xl p-6 transition-all duration-300 ${
-        hoverEffect
-          ? "hover:border-[#E85D04]/30 hover:shadow-lg hover:shadow-[#E85D04]/5 hover:translate-y-[-2px]"
-          : ""
-      } ${className}`}
+      className={`bg-card border border-border rounded-2xl p-6 transition-all duration-300 ${hoverEffect
+        ? "hover:border-[#E85D04]/30 hover:shadow-lg hover:shadow-[#E85D04]/5 hover:-translate-y-0.5"
+        : ""
+        } ${className}`}
       {...props}
     >
       {children}

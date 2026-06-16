@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MS | Admin Portfolio Dashboard",
+  title: "MS | Portfolio Dashboard",
   description: "Manage projects, blogs, and contact messages for MS Portfolio.",
 };
 

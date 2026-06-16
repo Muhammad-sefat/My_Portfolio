@@ -44,7 +44,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       if (storedProjects) setProjects(JSON.parse(storedProjects));
       if (storedBlogs) setBlogs(JSON.parse(storedBlogs));
       if (storedContacts) setContacts(JSON.parse(storedContacts));
-      
+
       if (storedTheme) {
         setTheme(storedTheme);
         if (storedTheme === "light") {
@@ -126,18 +126,18 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       ...prev,
       {
         ...blogData,
-        id: prev.length > 0 ? Math.max(...prev.map((b) => b.id)) + 1 : 1,
+        id: prev.length > 0 ? Math.max(...prev.map((b) => Number(b.id || 0))) + 1 : 1,
         date: formattedDate,
       },
     ]);
   };
 
   const editBlog = (updatedBlog: Blog) => {
-    setBlogs((prev) => prev.map((b) => (b.id === updatedBlog.id ? updatedBlog : b)));
+    setBlogs((prev) => prev.map((b) => (String(b.id) === String(updatedBlog.id) ? updatedBlog : b)));
   };
 
   const deleteBlog = (id: number) => {
-    setBlogs((prev) => prev.filter((b) => b.id !== id));
+    setBlogs((prev) => prev.filter((b) => Number(b.id) !== id));
   };
 
   // Contacts Actions

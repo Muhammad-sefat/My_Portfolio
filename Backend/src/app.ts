@@ -13,7 +13,15 @@ app.use(express.json());
 app.use(cors({ origin: "*" }));
 
 // Swagger API Docs
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+const swaggerOptions = {
+  customCssUrl: "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.min.css",
+  customJs: [
+    "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-bundle.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-standalone-preset.js",
+  ],
+};
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerOptions));
 
 // Application Routes
 app.use("/api", async (req: Request, res: Response, next) => {

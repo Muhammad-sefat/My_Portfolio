@@ -220,14 +220,14 @@ export function BlogContent() {
                 <div className="absolute top-3 right-3 flex gap-2">
                   <button
                     onClick={() => openEditModal(blog)}
-                    className="p-2 rounded-xl bg-background/80 text-muted-foreground hover:text-foreground hover:bg-card border border-border backdrop-blur-md transition-colors"
+                    className="p-2 rounded-xl bg-background/80 text-muted-foreground hover:text-foreground hover:bg-card border border-border backdrop-blur-md transition-colors cursor-pointer"
                     title="Edit blog"
                   >
                     <Edit3 className="h-3.5 w-3.5" />
                   </button>
                   <button
                     onClick={() => handleDelete(blog._id || blog.id || "", blog.title)}
-                    className="p-2 rounded-xl bg-background/80 text-red-400 hover:text-red-300 hover:bg-red-950/40 border border-red-900/20 backdrop-blur-md transition-colors"
+                    className="p-2 rounded-xl bg-background/80 text-red-400 hover:text-red-300 hover:bg-red-950/40 border border-red-900/20 backdrop-blur-md transition-colors cursor-pointer"
                     title="Delete blog"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -266,7 +266,7 @@ export function BlogContent() {
                       variant="outline"
                       size="sm"
                       onClick={() => openEditModal(blog)}
-                      className="flex gap-1 items-center px-2.5! py-1! text-xs"
+                      className="flex gap-1 items-center px-2.5! py-1! text-xs cursor-pointer"
                     >
                       <Edit3 className="h-3 w-3" />
                       Edit
@@ -275,7 +275,7 @@ export function BlogContent() {
                       variant="destructive"
                       size="sm"
                       onClick={() => handleDelete(blog._id || blog.id || "", blog.title)}
-                      className="flex gap-1 items-center px-2.5! py-1! text-xs"
+                      className="flex gap-1 items-center px-2.5! py-1! text-xs cursor-pointer"
                     >
                       <Trash2 className="h-3 w-3" />
                       Delete

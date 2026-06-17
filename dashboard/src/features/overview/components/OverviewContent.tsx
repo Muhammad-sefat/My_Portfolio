@@ -1,21 +1,47 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useDashboard } from "@/providers/DashboardProvider";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/Card";
 import { FolderGit2, BookOpen, MessageSquare, ArrowRight, ExternalLink } from "lucide-react";
+import { overviewService } from "../services/overview.service";
+import { DashboardStats } from "../types";
 
 export function OverviewContent() {
-  const { projects, blogs, contacts } = useDashboard();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const totalProjects = projects.length;
-  const totalBlogs = blogs.length;
-  const unreadMessages = contacts.filter((c) => !c.read).length;
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const data = await overviewService.getStats();
+        setStats(data);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load statistics");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
 
-  // Recent data (latest 3)
-  const recentProjects = [...projects].reverse().slice(0, 3);
-  const recentBlogs = [...blogs].reverse().slice(0, 3);
+  if (loading) {
+    return (
+      <div className="flex justify-center py-10 text-muted-foreground text-sm font-semibold">
+        Loading overview...
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="flex justify-center py-10 text-red-500 font-semibold">{error}</div>;
+  }
+
+  if (!stats) return null;
+
+  const { totalProjects, totalBlogs, unreadMessages, recentProjects, recentBlogs } = stats;
 
   return (
     <div className="space-y-6">
@@ -102,7 +128,7 @@ export function OverviewContent() {
             ) : (
               recentProjects.map((project) => (
                 <div
-                  key={project.id}
+                  key={project._id || project.id}
                   className="group flex gap-4 items-center rounded-xl bg-background p-3 border border-border hover:border-muted-foreground/20 transition-colors"
                 >
                   <img
@@ -153,7 +179,7 @@ export function OverviewContent() {
             ) : (
               recentBlogs.map((blog) => (
                 <div
-                  key={blog.id}
+                  key={blog._id || blog.id}
                   className="flex gap-4 items-center rounded-xl bg-background p-3 border border-border hover:border-muted-foreground/20 transition-colors"
                 >
                   <img

@@ -5,34 +5,40 @@ import { X, Clock, Calendar, Tag } from 'lucide-react';
 import gsap from 'gsap';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { setActiveBlogId } from '@/lib/store/slices/uiSlice';
-import { blogs } from '../data/blogs';
 
 export default function BlogModal() {
   const dispatch = useAppDispatch();
+  const blogs = useAppSelector((s) => s.ui.blogs);
   const activeBlogId = useAppSelector((s) => s.ui.activeBlogId);
-  const blog = blogs.find((b) => b.id === activeBlogId) ?? null;
+  const blog = blogs.find((b) => (b._id || b.id) === activeBlogId) ?? null;
   const overlayRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
+  // Manage body scroll lock
   useEffect(() => {
-    if (!overlayRef.current || !cardRef.current) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
     if (blog) {
       document.body.style.overflow = 'hidden';
-      gsap.fromTo(
-        overlayRef.current,
-        { opacity: 0 },
-        { opacity: 1, duration: 0.2, ease: 'power2.out' }
-      );
-      gsap.fromTo(
-        cardRef.current,
-        { opacity: 0, scale: 0.95, y: 20 },
-        { opacity: 1, scale: 1, y: 0, duration: 0.3, ease: 'power2.out' }
-      );
-    } else {
-      document.body.style.overflow = '';
     }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [blog]);
+
+  // GSAP animations
+  useEffect(() => {
+    if (!blog || !overlayRef.current || !cardRef.current) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    gsap.fromTo(
+      overlayRef.current,
+      { opacity: 0 },
+      { opacity: 1, duration: 0.2, ease: 'power2.out' }
+    );
+    gsap.fromTo(
+      cardRef.current,
+      { opacity: 0, scale: 0.95, y: 20 },
+      { opacity: 1, scale: 1, y: 0, duration: 0.3, ease: 'power2.out' }
+    );
   }, [blog]);
 
   const close = () => dispatch(setActiveBlogId(null));

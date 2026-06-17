@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronUp, Clock, Calendar } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -8,9 +8,11 @@ import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import {
   toggleBlogsExpanded,
   setActiveBlogId,
+  setBlogs as setReduxBlogs,
 } from "@/lib/store/slices/uiSlice";
-import { blogs } from "../data/blogs";
 import Image from "next/image";
+import { Blog } from "../types";
+import { blogService } from "../services/blog.service";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -22,7 +24,28 @@ export default function Blogs() {
   const sectionRef = useRef<HTMLElement>(null);
   const extraRef = useRef<HTMLDivElement>(null);
 
+  const [blogs, setBlogsState] = useState<Blog[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   useEffect(() => {
+    const loadBlogs = async () => {
+      try {
+        const data = await blogService.getBlogs();
+        setBlogsState(data);
+        dispatch(setReduxBlogs(data));
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load blog posts.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadBlogs();
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (loading || blogs.length === 0) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -42,7 +65,7 @@ export default function Blogs() {
       );
     }, sectionRef);
     return () => ctx.revert();
-  }, []);
+  }, [loading, blogs]);
 
   useEffect(() => {
     if (!expanded || !extraRef.current) return;
@@ -70,19 +93,29 @@ export default function Blogs() {
         </div>
 
         {/* Initial grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {visible.map((blog) => (
-            <BlogCard
-              key={blog.id}
-              blog={blog}
-              className="blog-initial"
-              onClick={() => dispatch(setActiveBlogId(blog.id))}
-            />
-          ))}
-        </div>
+        {loading ? (
+          <div className="text-center py-12 text-muted-foreground text-sm font-semibold">
+            Loading articles...
+          </div>
+        ) : error ? (
+          <div className="text-center py-12 text-red-500 font-semibold">
+            {error}
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {visible.map((blog) => (
+              <BlogCard
+                key={blog._id || blog.id}
+                blog={blog}
+                className="blog-initial"
+                onClick={() => dispatch(setActiveBlogId(blog._id || blog.id || null))}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Expanded */}
-        {hidden.length > 0 && (
+        {!loading && !error && hidden.length > 0 && (
           <div
             ref={extraRef}
             className={`overflow-hidden transition-all duration-500 ${
@@ -92,10 +125,10 @@ export default function Blogs() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {hidden.map((blog) => (
                 <BlogCard
-                  key={blog.id}
+                  key={blog._id || blog.id}
                   blog={blog}
                   className="blog-extra"
-                  onClick={() => dispatch(setActiveBlogId(blog.id))}
+                  onClick={() => dispatch(setActiveBlogId(blog._id || blog.id || null))}
                 />
               ))}
             </div>
@@ -103,11 +136,11 @@ export default function Blogs() {
         )}
 
         {/* Toggle */}
-        {hidden.length > 0 && (
+        {!loading && !error && hidden.length > 0 && (
           <div className="flex justify-center mt-10">
             <button
               onClick={() => dispatch(toggleBlogsExpanded())}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl border border-border text-muted-foreground hover:text-[#E85D04] hover:border-[#E85D04] transition-all duration-200"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl border border-border text-muted-foreground hover:text-[#E85D04] hover:border-[#E85D04] transition-all duration-200 cursor-pointer"
             >
               {expanded ? (
                 <>
@@ -129,7 +162,7 @@ export default function Blogs() {
 }
 
 interface BlogCardProps {
-  blog: (typeof blogs)[number];
+  blog: Blog;
   className?: string;
   onClick: () => void;
 }
@@ -143,7 +176,7 @@ function BlogCard({ blog, className = "", onClick }: BlogCardProps) {
       {/* Image */}
       <div className="relative h-44 overflow-hidden">
         <Image
-          src={blog.image}
+          src={blog.image || "https://picsum.photos/seed/default/800/400"}
           alt={blog.title}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

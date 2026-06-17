@@ -8,13 +8,14 @@ import { Send, Mail, MapPin, Github, Linkedin } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useToast } from "@/hooks/use-toast";
+import { contactService } from "../services/contact.service";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const schema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email"),
-  subject: z.string().min(3, "Subject must be at least 3 characters"),
+  subject: z.string().optional(),
   message: z.string().min(10, "Message must be at least 10 characters"),
 });
 
@@ -76,13 +77,26 @@ export default function Contact() {
   }, []);
 
   const onSubmit = async (data: FormData) => {
-    console.log("Form submitted:", data);
-    await new Promise((r) => setTimeout(r, 600));
-    reset();
-    toast({
-      title: "Message sent!",
-      description: "I'll get back to you soon.",
-    });
+    try {
+      await contactService.submitContact({
+        name: data.name,
+        email: data.email,
+        subject: data.subject || "General Inquiry",
+        message: data.message,
+      });
+      reset();
+      toast({
+        title: "Message sent!",
+        description: "I'll get back to you soon.",
+      });
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: "Submission Error",
+        description: "Failed to send message. Please check your network or try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

@@ -43,6 +43,22 @@ export const api = {
         return res.json();
     },
 
+    patch: async <T>(endpoint: string, data: any): Promise<T> => {
+        const res = await fetch(`${API_URL}${endpoint}`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (!res.ok) {
+            throw new Error("Failed to update data");
+        }
+
+        return res.json();
+    },
+
     delete: async <T>(endpoint: string): Promise<T> => {
         const res = await fetch(`${API_URL}${endpoint}`, {
             method: "DELETE",

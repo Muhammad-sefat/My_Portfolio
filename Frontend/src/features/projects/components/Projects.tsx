@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { toggleProjectsExpanded } from "@/lib/store/slices/uiSlice";
 import ProjectCard from "./ProjectCard";
-import { projects } from "../data/projects";
+import { Project } from "../types";
+import { projectService } from "../services/project.service";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -19,7 +20,27 @@ export default function Projects() {
   const sectionRef = useRef<HTMLElement>(null);
   const extraRef = useRef<HTMLDivElement>(null);
 
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   useEffect(() => {
+    const loadProjects = async () => {
+      try {
+        const data = await projectService.getProjects();
+        setProjects(data);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load projects.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadProjects();
+  }, []);
+
+  useEffect(() => {
+    if (loading || projects.length === 0) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -39,7 +60,7 @@ export default function Projects() {
       );
     }, sectionRef);
     return () => ctx.revert();
-  }, []);
+  }, [loading, projects]);
 
   useEffect(() => {
     if (!expanded || !extraRef.current) return;
@@ -68,16 +89,26 @@ export default function Projects() {
         </div>
 
         {/* Initial grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {visible.map((project) => (
-            <div key={project.id} className="project-initial">
-              <ProjectCard project={project} />
-            </div>
-          ))}
-        </div>
+        {loading ? (
+          <div className="text-center py-12 text-muted-foreground text-sm font-semibold">
+            Loading projects...
+          </div>
+        ) : error ? (
+          <div className="text-center py-12 text-red-500 font-semibold">
+            {error}
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {visible.map((project) => (
+              <div key={project._id || project.id} className="project-initial">
+                <ProjectCard project={project} />
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Expanded grid */}
-        {hidden.length > 0 && (
+        {!loading && !error && hidden.length > 0 && (
           <div
             ref={extraRef}
             className={`overflow-hidden transition-all duration-500 ${
@@ -86,7 +117,7 @@ export default function Projects() {
           >
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {hidden.map((project) => (
-                <div key={project.id} className="project-extra">
+                <div key={project._id || project.id} className="project-extra">
                   <ProjectCard project={project} />
                 </div>
               ))}
@@ -95,11 +126,11 @@ export default function Projects() {
         )}
 
         {/* Toggle button */}
-        {hidden.length > 0 && (
+        {!loading && !error && hidden.length > 0 && (
           <div className="flex justify-center mt-10">
             <button
               onClick={() => dispatch(toggleProjectsExpanded())}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl border border-border text-muted-foreground hover:text-[#E85D04] hover:border-[#E85D04] transition-all duration-200"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl border border-border text-muted-foreground hover:text-[#E85D04] hover:border-[#E85D04] transition-all duration-200 cursor-pointer"
             >
               {expanded ? (
                 <>

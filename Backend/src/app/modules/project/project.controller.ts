@@ -8,7 +8,7 @@ const addProject = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: 201,
     success: true,
-    message: "Project uploaded successfully",
+    message: "Project created successfully",
     data: result,
   });
 });

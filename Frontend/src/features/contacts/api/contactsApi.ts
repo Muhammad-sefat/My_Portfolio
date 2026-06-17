@@ -1,7 +1,20 @@
-// Placeholder API functions for the Contacts feature.
+import { api } from "@/lib/api";
+
+interface ContactPayload {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
+interface ContactResponse {
+  success: boolean;
+  message: string;
+  data: any;
+}
+
 export const contactsApi = {
-  submitContactForm: async (data: any): Promise<any> => {
-    // In future: return fetch('/api/contacts', { method: 'POST', body: JSON.stringify(data) })
-    return { success: true };
+  async submitContactForm(data: ContactPayload): Promise<ContactResponse> {
+    return api.post<ContactResponse>("/contacts", data);
   },
 };

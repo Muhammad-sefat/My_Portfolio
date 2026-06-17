@@ -14,7 +14,7 @@ interface DashboardContextType {
   contacts: Contact[];
   addProject: (project: Omit<Project, "id">) => void;
   editProject: (project: Project) => void;
-  deleteProject: (id: number) => void;
+  deleteProject: (id: string | number) => void;
   addBlog: (blog: Omit<Blog, "id" | "date">) => void;
   editBlog: (blog: Blog) => void;
   deleteBlog: (id: number) => void;
@@ -98,19 +98,19 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       ...prev,
       {
         ...projectData,
-        id: prev.length > 0 ? Math.max(...prev.map((p) => p.id)) + 1 : 1,
+        id: prev.length > 0 ? Math.max(...prev.map((p) => Number(p.id || 0))) + 1 : 1,
       },
     ]);
   };
 
   const editProject = (updatedProject: Project) => {
     setProjects((prev) =>
-      prev.map((p) => (p.id === updatedProject.id ? updatedProject : p))
+      prev.map((p) => (String(p.id) === String(updatedProject.id) ? updatedProject : p))
     );
   };
 
-  const deleteProject = (id: number) => {
-    setProjects((prev) => prev.filter((p) => p.id !== id));
+  const deleteProject = (id: string | number) => {
+    setProjects((prev) => prev.filter((p) => String(p.id) !== String(id)));
   };
 
   // Blog CRUD
